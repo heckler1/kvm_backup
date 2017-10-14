@@ -34,9 +34,11 @@ then
         # If there is already a previous backup, delete it
         if [ -d "$TARGET_DIR.prev" ]
         then
-            rm -rf $TARGET_DIR.prev
+            rm -rf "$TARGET_DIR.prev"
+            echo "Removed second most recent backup."
         fi
-        mv $TARGET_DIR $TARGET_DIR.prev
+        mv $TARGET_DIR "$TARGET_DIR.prev"
+        echo "Moved most recent backup out of the way."
         mkdir $TARGET_DIR
     fi
 fi
@@ -50,7 +52,8 @@ for name in $(
     done | sed '/running/d' | awk 'NR%2==0' )
 do
     # Quiesce the file system of each VM
-    sudo virsh domfsfreeze $name
+    sudo virsh domfsfreeze $name > /dev/null
+    echo "Froze filesystem on $name"
 done
 
 # Take the snapshot
@@ -65,22 +68,29 @@ for name in $(
     done | sed '/running/d' | awk 'NR%2==0' )
 do
     # Quiesce the file system of each VM
-    sudo virsh domfsthaw $name
+    sudo virsh domfsthaw $name > /dev/null
+    echo "Thawed filsystem on $name."
 done
 
 # Make the mount directory
 mkdir $MOUNT_DIR || exit 1
-
+echo "Created mount point."
 # Mount the snapshot
 # Add the 'nouuid' option if backing up an XFS formatted volume
-mount -o ro $VG_PATH/$SNAPSHOT_NAME $MOUNT_DIR || exit 1 
+mount -o ro $VG_PATH/$SNAPSHOT_NAME $MOUNT_DIR || exit 1
+echo "Mounted snapshot."
 
 # Copy the contents of the snapshotted volume to the target
+echo "Starting copy..."
 cp -r --force $MOUNT_DIR/* $TARGET_DIR
+echo "Copy complete."
 
 # Unmount and remove the LV snapshot
 umount $MOUNT_DIR
+echo "Unmounted snapshot."
 lvremove -f $VG_PATH/$SNAPSHOT_NAME
+echo "Removed snapshot."
 
 # Remove the mount directory
 rmdir $MOUNT_DIR
+echo "Removed mount point."
