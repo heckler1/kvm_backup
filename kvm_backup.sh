@@ -23,6 +23,24 @@ umount $MOUNT_DIR > /dev/null 2>&1
 # Ensure there is no LV with the same name
 lvremove -f $VG_PATH/$SNAPSHOT_NAME > /dev/null 2>&1
 
+# Keep the most recent backup before the current run
+# If the target directory exists
+if [ -d "$TARGET_DIR" ] 
+then
+    # And if there are files in the directory
+    TARGET_FILES=$TARGET_DIR/*
+    if [ ${#TARGET_FILES[@]} -gt 0 ]
+    then
+        # If there is already a previous backup, delete it
+        if [ -d "$TARGET_DIR.prev" ]
+        then
+            rm -rf $TARGET_DIR.prev
+        fi
+        mv $TARGET_DIR $TARGET_DIR.prev
+        mkdir $TARGET_DIR
+    fi
+fi
+
 # Freeze and quiesce the guest filesystems
 for name in $(
     # Get the names of all running VMs
