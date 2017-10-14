@@ -9,9 +9,9 @@
 # Written by Stephen Heckler - 10/14/2017
 
 # Settings used by the below, customize this
-TARGET=/mnt/smb/share_data/vms/
-VG_PATH=/dev/cl
-LV_NAME=vms
+TARGET_DIR=
+VG_PATH=
+LV_NAME=
 # Be sure to leave adequate room for disk writes during the backup
 SNAPSHOT_SIZE=10G
 SNAPSHOT_NAME=kvmbackup-`date +%s`
@@ -58,7 +58,7 @@ mkdir $MOUNT_DIR || exit 1
 mount -o ro $VG_PATH/$SNAPSHOT_NAME $MOUNT_DIR || exit 1 
 
 # Copy the contents of the snapshotted volume to the target
-cp -r --force $MOUNT_DIR/* $TARGET
+cp -r --force $MOUNT_DIR/* $TARGET_DIR
 
 # Unmount and remove the LV snapshot
 umount $MOUNT_DIR
