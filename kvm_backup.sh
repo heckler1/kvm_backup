@@ -9,6 +9,7 @@
 # Written by Stephen Heckler - 10/14/2017
 
 # Settings used by the below, customize this
+# No trailing slash on target directory
 TARGET_DIR=
 VG_PATH=
 LV_NAME=
@@ -34,12 +35,12 @@ then
         # If there is already a previous backup, delete it
         if [ -d "$TARGET_DIR.prev" ]
         then
-            rm -rf "$TARGET_DIR.prev"
-            echo "Removed second most recent backup."
+            # Overwrite the second-latest backup with the latest backup
+            mv -f $TARGET_FILES "$TARGET_DIR.prev/"
+            echo "Moved most recent backup out of the way."
+        #    rm -rf "$TARGET_DIR.prev"
+        #    echo "Removed second most recent backup."
         fi
-        mv $TARGET_DIR "$TARGET_DIR.prev"
-        echo "Moved most recent backup out of the way."
-        mkdir $TARGET_DIR
     fi
 fi
 
@@ -82,7 +83,7 @@ echo "Mounted snapshot."
 
 # Copy the contents of the snapshotted volume to the target
 echo "Starting copy..."
-cp -r --force $MOUNT_DIR/* $TARGET_DIR
+cp -r $MOUNT_DIR/* $TARGET_DIR/
 echo "Copy complete."
 
 # Unmount and remove the LV snapshot
