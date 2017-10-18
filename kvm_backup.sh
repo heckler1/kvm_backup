@@ -1,11 +1,9 @@
 #!/bin/bash
 
-# Backup large virtual hard disks from running VMs stored on an LV
+# Backup large virtual hard disks stored on an LV, while in use by running VMs 
 
 # This script quiesces the guest filesystems, takes an LVM Snapshot, and backs up the contents of that snapshot to the target directory with cp.
-# By design it overwrites files on the target volume.
-# It is designed to be used with large virtual disk images that are nearly impossible to incrementally backup, 
-# and are impractical to keep multiple copies of.
+# It is designed to be used with large virtual disk images, which are impractical to incrementally backup or keep many copies of.
 # Written by Stephen Heckler - 10/14/2017
 
 # Settings used by the below, customize this
@@ -32,14 +30,16 @@ then
     TARGET_FILES=$TARGET_DIR/*
     if [ ${#TARGET_FILES[@]} -gt 0 ]
     then
-        # If there is already a previous backup, delete it
         if [ -d "$TARGET_DIR.prev" ]
         then
             # Overwrite the second-latest backup with the latest backup
             mv -f $TARGET_FILES "$TARGET_DIR.prev/"
             echo "Moved most recent backup out of the way."
-        #    rm -rf "$TARGET_DIR.prev"
-        #    echo "Removed second most recent backup."
+        else
+            # Create the directory for the previous backup and then move the latest backup into it
+            mkdir -p "$TARGET_DIR.prev"
+            mv -f $TARGET_FILES "$TARGET_DIR.prev/"
+            echo "Moved most recent backup out of the way."
         fi
     fi
 fi
@@ -95,3 +95,4 @@ echo "Removed snapshot."
 # Remove the mount directory
 rmdir $MOUNT_DIR
 echo "Removed mount point."
+echo "Backup complete."
