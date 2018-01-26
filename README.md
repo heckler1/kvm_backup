@@ -8,7 +8,7 @@ The main goal of this script is to have very little effect on the uptime of the 
 
 Filesystem quiescing requires the QEMU Guest Agent to be installed on the VMs that are being backed up.
 
-#### Backup Process
+#### Backup Steps
 1. Check to make sure the mount directory and snapshot name have not already been used
 2. Check for a previous backup, move it out of the way if needed. Only keeps two backups - one current one and one previous one.
 3. Freeze and quiesce the guest filesystems
